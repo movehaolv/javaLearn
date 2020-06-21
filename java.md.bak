@@ -1,0 +1,56 @@
+```
+ https://www.bilibili.com/video/BV1P7411V7nQ?p=226
+```
+
+### jvm
+
+#### 内存图初入
+
+![1592619042101](C:\Users\ADMINI~1\AppData\Local\Temp\1592619042101.png)
+
+#### 递归内存图
+
+ ![1592619105176](C:\Users\ADMINI~1\AppData\Local\Temp\1592619105176.png)
+
+#### 对象内存图
+
+![1592619161814](C:\Users\ADMINI~1\AppData\Local\Temp\1592619161814.png)
+
+![1592619178555](C:\Users\ADMINI~1\AppData\Local\Temp\1592619178555.png)
+
+#### 对象作为实例变量的内存图
+
+![1592619233319](C:\Users\ADMINI~1\AppData\Local\Temp\1592619233319.png)
+
+![1592619243996](C:\Users\ADMINI~1\AppData\Local\Temp\1592619243996.png)
+
+**执行javac Test.java生成Test.class，User.class和Address.class，在运行 java Test的时候jvm就有如下内存图**   
+
+![1592619638350](C:\Users\ADMINI~1\AppData\Local\Temp\1592619638350.png)
+
+#### 值拷贝
+
+**Java中都是值拷贝，不是引用，基本类型是把保存在内存中的值拷贝，引用类型也是把保存在内存中的地址值拷贝**
+
+![1592619778573](C:\Users\ADMINI~1\AppData\Local\Temp\1592619778573.png)
+
+#### 253静态变量jvm
+
+![1592619812420](C:\Users\ADMINI~1\AppData\Local\Temp\1592619812420.png)
+
+#### 254 空指针异常
+
+```
+重点 空指针异常只有在 空引用访问实例相关
+p1.country 访问静态变量也行，其实将p1变成Person.country进行访问了，所以可以空指针访问
+```
+
+#### 262 this 内存结构
+
+![1592619887163](C:\Users\ADMINI~1\AppData\Local\Temp\1592619887163.png)
+
+### 类
+
+#### 262 方法覆盖
+
+![1592619974701](C:\Users\ADMINI~1\AppData\Local\Temp\1592619974701.png)
