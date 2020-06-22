@@ -1,5 +1,5 @@
 ---
-typora-root-url: typora\png
+
 ---
 
 ```
@@ -10,7 +10,7 @@ typora-root-url: typora\png
 
 #### 内存图初入
 
-![](D:\java\typora\png\image001.png)
+![](\png\image001.png)
 
 #### 递归内存图
 
