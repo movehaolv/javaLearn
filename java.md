@@ -102,6 +102,10 @@ class CreditAccount extends Account{
 
 
 
+#### 数组内存图
+
+![1593096026501](png/数组.png)
+
 ### 类
 
 #### 方法覆盖
@@ -220,6 +224,201 @@ public static void main(String[] args){
 8、一个非抽象的类继承抽象类，必须将抽象类中的方法重写
 
 #### 接口
+
+##### 接口基础语法
+
+1、接口是一种引用数据类型
+
+2、接口是完全抽象的
+
+3、接口定义：[修饰符列表] interface 接口名{}
+
+4、接口支持多继承
+
+5、接口只有常量 + 抽象方法
+
+6、接口中所有的元素都是public修饰的
+
+7、接口中抽象方法的public abstract可以省略
+
+8、接口中常量的public static final可以省略
+
+9、接口中的方法不能有方法体
+
+10、一个非抽象的类，实现接口的时候，必须将接口中所有的方法都实现、
+
+11、一个类可以实现多个接口
+
+12、extends和implements可以共存，extends在前，implements在后
+
+13、使用接口写代码的时候，可使用多态（父类型引用指向子类型对象）
+
+（ps ：接口一般都是对行为的抽象，**接口中没有构造方法**）
+
+
+
+##### 类实现接口
+
+1、类和类之间叫继承(extends)，类和接口之间叫实现(implements)，实现可以认为是继承
+
+2、当一个非抽象的类实现接口，必须将接口中的方法全部实现（方法覆盖）**因为非抽象类中不能有抽象方法**
+
+3、接口之间强制类型转型可以没有继承关系，但是可能会出现ClassCaseException异常
+
+```java
+public class Test{
+	public static void main(String[] args) {
+		A a1 = new D();
+		// A,B,C三个类型都没有关系，因为D实现了A,B，所以将a1强转B，编译运行都没问题，还能调用b的方法
+		B b1 = (B) a1;
+		b1.b();
+		// 转成C类型，编译通过，但是运行报错
+	    //C c1 = (C)a1;
+		// 所以需要用instanceof来判断
+		System.out.println(a1 instanceof B); // true
+		System.out.println(a1 instanceof C); // false
+	}
+}
+
+interface A{void a();}
+
+interface B{void b();}
+
+interface C{}
+
+class D implements A,B {
+	public void a(){
+		System.out.println("a");
+	}
+	public void b(){
+		System.out.println("b");
+	}
+}
+```
+
+##### 接口在开发中的应用
+
+多态：面向抽象编程，不是面向具体编程，降低耦合度，提升扩展力。即OCP原则（对扩展开放，对修改关闭）
+
+```java
+public void feed(Animal a) // 父类 比 子类 更抽象，所以我们称为面向抽象编程
+```
+
+总结：接口离不开多态，接口 + 多态 可降低耦合度
+
+- 任何一个接口都有调用者和实现者；
+- 接口可以将调用者和实现者解耦合
+- 调用者面向接口调用
+- 实现者面向接口编写实现
+
+##### 类型与类型之间的关系
+
+- is a: ”继承关系“ Cat is a Animal 
+
+- has a: “关联关系” ，通常以“属性”的形式存在 
+
+  ```java
+  A{
+      B b;
+  } 
+  ```
+
+- like a: “实现关系”，厨师像一个菜单
+
+#### Object
+
+##### equals
+
+- “==” 用于判断两个变量保存的值，可用于判断基本数据类型，如果判断引用类型，只能确定是否为同一个对象
+- 判断两个引用类型的，需要重写equals方法
+
+```java
+public class MyTime{
+  private int year;
+  private int month;
+  public boolean equals(Object obj){
+      if (obj == null || !(obj instanceof MyTime)) {
+          return false;
+      }
+      if (this == obj) {
+          return true;
+      }
+    MyTime t = (MyTime) obj;
+    return this.year == t.year && this.month == t.month;
+	}  
+}
+
+```
+
+##### toString
+
+- Object的toString方法是对象内存地址的16进制 + 类名
+
+##### finalize
+
+- 如果想在对象在垃圾回收机制回收的时候记录下时间，可以重写，无需手动调用，垃圾回收机制会自动调用
+
+  ```
+  protected void finalize() throws TRhrowable{
+      System.out.println("即将被销毁" + 时间);
+  }
+  ```
+
+#### 匿名内部类
+
+`1` 内部类的分类
+
+- 静态内部类：类似于静态变量
+- 实例内部类：类似于实例变量
+- 局部内部类：相当于局部变量
+- 
+
+`2`  进阶
+
+```
+class Test{
+    static class Inner1{}
+    class Inner2{}
+    public void doSome(){
+        class Inner3{}
+    }
+    public void doOther(){
+        // doSome 方法中的局部内部类Inner3无法调用
+        new Inner1();
+        new Inner3();
+    }
+}
+```
+
+
+
+```java
+// 不建议使用匿名内部类
+public class Test{
+	public static void main(String[] args) {
+		MyMath m = new MyMath();
+		m.mySum(new Compute(){
+			public int sum(int a, int b){
+				return a + b;
+			} // 这里匿名内部类需要实现接口的方法
+		}, 10, 20 );
+	}
+
+}
+
+interface Compute{
+	int sum(int a, int b);
+}
+
+class MyMath{
+	public void mySum(Compute c, int x, int y){
+		int sumValue = c.sum(x, y);
+		System.out.println("x + y = " + sumValue);
+	}
+}
+```
+
+
 
 
 
