@@ -8,9 +8,11 @@
 
 ### jvm
 
+基本数据类型在内存图中保存的是值，应用数据类型保存的是内存地址
+
 #### 内存图首入
 
-![](\png\image001.png)
+![](png\image001.png)
 
 #### 递归内存图
 
@@ -104,7 +106,64 @@ class CreditAccount extends Account{
 
 #### 数组内存图
 
-![1593096026501](png/数组.png)
+![1593165837975](png/一维数组.png)
+
+#### String 内存图
+
+##### 内存图
+
+- 字符串都是在方法区的字符串常量池中，垃圾回收器不会释放常量
+
+```java
+public static void main(String[] args) {
+    // 下面2行代码创建了3个字符串对象，都在常量池中
+    String s1 = "abcdef";
+    String s2 = "abcdef" + "xy";
+
+    // new对象一定在堆内存中开辟空间，堆中存放字符串在常量中的内存地址
+    String s3 = new String("xy");
+}
+```
+
+![1593260327502](png/String内存图)
+
+##### 字符串实例变量内存图
+
+```java
+public class Test{
+	public static void main(String[] args) {
+		User  user = new User(100, "张三");
+	}
+}
+
+class User{
+	private int id;
+	private String name;
+
+	public User(int id, String name){
+		this.id = id;
+		this.name = name;
+	}
+}
+```
+
+![1593260705518](png/字符串实例变量内存图)
+
+##### “==” 比较双引号字符串
+
+```java
+String s1 = "hello";
+String s2 = "hello";
+s1 == s2 // true
+
+String x = new String("xyz");
+String y = new String("xyz");
+x == y; // false
+```
+
+![
+
+1593261568458](png/String_等于号比较内存图)
 
 ### 类
 
@@ -417,6 +476,1001 @@ class MyMath{
 	}
 }
 ```
+
+### Other
+
+#### 数组
+
+##### 数组的优点
+
+- 查询某个下标上的元素时效率极高，查询效率最高的数据结构
+
+  - 每一个元素的内存地址在空间存储上实连续的
+  - 每一个元素类型相同，所以占用空间大小一样
+  - 知道第一个元素内存地址，知道每个元素占用空间大小，又知道下标，所以通过一个数学表达式可以计算出某个下标上元素的内存地址。直接通过内存地址定位元素，所以数组的检索效率实最高的
+
+  数组中存储多少个元素检索效率都是一样的，他是根据计算内存地址来定位的。  
+
+##### 数组的缺点
+
+- 为了保证每个元素的内存地址连续，所以数组上删除或者增加元素，效率低，因为随机增删元素会涉及到后面元素统一向前或向后位移的操作
+- 无法存储大数据量，因为很难在内存中找到连续的一块大内存
+
+注意：对数组上最后一个元素的增删是没有影响的  
+
+##### 数组的写法
+
+```java
+int[] arr0 = new int[3]; // 动态数组
+arr[0] = 1;
+
+int[] arr1 = {1,2,3}; // 静态数组
+
+int[] arr2 = new int[]{1,2,3} // 如要作为形参传递函数内，静态数组必须用这种形式
+printArray({1,2,3}) // error  | printArray(new int[]{1,2,3}) or printArray(arr1)  // right
+```
+
+##### String[] args
+
+- jvm调用main方法，默认传的是一个空数组({} 或 new String[0])，在cmd中以空格分隔输入a b c，会被自动封装成{"a","b","c"}的数组传递进去，是命令行作用
+
+##### 数组扩容
+
+- 新建一个大容量的数组，然后将小容量数组中的数据一个一个拷贝到大数组中。效率较低，所以在创建数组的时候预估数组长度，减少扩容。
+
+![1593232572022](png/数组拷贝)
+
+![1593232602999](png/数组拷贝1)
+
+##### 二维数组
+
+- 定义：里面的元素时一维数组
+
+  ```java
+  int[][] ar = {{1},{1,2,3},{2,3}}; // 静态初始化二维数组
+  int[] ar0 = arr[0] // 取出二维数组的第一个元素
+  
+  int[][] arr = new int[2][3]; // 动态初始化
+  arr[0] = new int[]{2,3,4} // 给第一个数组赋值 arr[0] = {1，2，3} error
+  arr[0][0] = 2 // 给元素赋值
+  
+  printArray({{1},{1,2,3},{2,3}}) // 是错误的， 参考 一维数组一样
+  ```
+
+##### 排序&二分查找
+
+- 冒泡排序：从小打大排序
+
+  - 两两元素比较大小，大的值放在右边，遍历完一次的结果是最大值放到了数组末尾
+
+  ```java
+  // 用i--方式好写
+  for(int i = arr.length-1; i > 0; i--){ // i是遍历的次数。如数组长度为7，i=arr.length-1=6：第一次遍历要交换的次数为6
+      for(int j = 0; j < i; j++){ // j<i=6，第一次要遍历6次
+          if(arr[j] > arr[j+1]){
+              int tmp = arr[j];
+              arr[j] = arr[j+1];
+              arr[j+1] = tmp;
+          }
+  			}
+  ```
+
+- 选择排序：
+
+  ![1593243511507](png/选择排序)
+
+  
+
+  ```javascript
+  public static void sortArray(int[] arr){
+      for(int i = 0;i < arr.length-1; i++){ // i是参与比较的这堆数据中的起点下标
+          int min = i; // 假设起点i下标位置上的数组元素时最小的
+  
+          for(int j = i+1; j < arr.length; j++){
+              if(arr[min] > arr[j]){
+                  min = j;
+              }
+          }
+          if(min != i){ // 当 i == min，表示猜测正确，当i != min，表示猜测错误，需要交换位置
+              int temp;
+              temp = arr[i];
+              arr[i] = arr[min];
+              arr[min] = temp;
+          }
+      }
+  }
+  ```
+
+- 二分查找
+
+  ```
+  public int binarySearch(int[] arr, int dest){
+      int begin = 0;
+      int end = arr.length - 1;
+      while(begin <= end){
+          mid = (begin + end) / 2
+          if(arr[mid] == dest){
+              return mid;
+          }else if(arr[mid] < dest){
+              begin = mid + 1;
+          }else{
+              end = mid - 1;
+          }
+      } 
+      return -1;
+  }
+  
+  ```
+
+  
+
+#### Strings & Integer
+
+##### 一共几个对象
+
+```
+String s1 = new String("hello");
+String s2 = new String("hello");
+// 一共3个对象，字符串常量池中1个： “hello”， 堆内存有2个String对象
+```
+
+##### 常用构造方法
+
+```
+byte[] bytes = {97, 98, 99};
+String s2 = new String(bytes)l // print = abc
+
+String s3 = new String(bytes, 1, 2) // print = bc
+
+char[] chars = {'我','很','高', '很', '瘦'};
+String s4 = new String(chars); // print = 我很高
+String s4 = new String(chars， 1， 2); // print = 很高
+```
+
+##### stringBuffer
+
+- StringBuffer底层是一个byte数组，往StringBuffer中放字符串，实际放到byte数组中了，StringBuffer的初始化容量为16
+
+- 在创建StringBufferde时候，尽可能初始化容量，最好减少底层数组的扩容次数。
+
+- 拼接字符换，调用append方法，如果用“+”方式，如下
+
+  ```java
+  String s = "abc";
+  s += "hello";
+  会在方法去常量池当中创建3个对象
+  "abc" "hello" "abchello"
+  ```
+
+##### StringBuffer和StringBuilder的区别
+
+- StringBuffer中的方法都有：synchronized关键字修饰。表示多线程环境运行安全
+- StringBuilder中没有修饰，多线程运行不安全
+
+##### StringBuffer和StringBuilder为什么可变
+
+- 因为他们的内部是一个byte[]数组，并且没有被final修饰，初始化容量是16，存满之后会自动扩容，底层调用数据拷贝的方法，System.arraycopy()，所以适合字符串的频繁拼接操作
+
+##### 自动装箱与拆箱
+
+```java
+// 自动装箱，x是一个引用，保存了对象的内存地址
+Integer x = 100; // = new Integer(100);
+// 自动拆箱
+int y = x;
+```
+
+##### int-String-Integer转换
+
+![1593933576436](png/int_String_Integer转换)
+
+#### 日期&随机数&枚举
+
+##### 日期格式化
+
+```java
+SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+String nowTimeStr = sdf.format(new Date()); // 当前时间
+
+// 获取昨天的此时
+Date time2 = new Date(System.currentTimeMillis() - 1000*60*60*24);
+sft.format(time2);
+```
+
+##### 数字格式化
+
+``` java
+# 任意数字
+,  千分位
+. 小数点
+0 不够时补0
+###,###.## 表示： 加入千分位，保留2位小数
+DecimalFormat df = new DecimalFormat("###,###.##");
+String s = df.format(1234.561232); // 1,234.56 
+
+DecimalFormat df = new DecimalFormat("###,###.0000");
+String s = df.format(1234.56); // 1,234.5600
+```
+
+##### 高精度数字
+
+```java
+BigDecimal v1 = new BigDecimal(100); // 精度极高的100
+BigDecimal v2 = new BigDecimal(200);
+v1.add(v2) // 不能直接相加，因为是引用
+v1.divide(v2);
+```
+
+##### 随机数
+
+```
+Random random = new Random();
+random.nextInt(); // 随机产生一个int
+random.nextInt(101); // 随机产生[0,100]的数
+```
+
+##### 枚举
+
+```java
+1. 枚举是引用数据类型
+2. enum 枚举类型名{
+    枚举1，枚举2
+}
+3. 只有2中情况，建议使用布尔类型，超过两种且可以一枚一枚列举出来的，使用枚举类型
+
+```
+
+#### 异常
+
+##### 异常结构图
+
+![1593935975985](png/异常结构)
+
+
+
+- IllegaArgumentException下有NumberFormatException （如Integer.Valueof() 可出现此一次）
+
+```java
+1. Object下有Throwable（可抛出的）
+2. Throwable下有Error（不可处理，直接退出jvm）和Exception（可处理）
+3. Exception下有2个分支：
+  3.1 Exception的直接子类，编译时异常
+  3.2 RuntimeException：运行时异常
+
+```
+
+
+
+- 编译时异常与运行时异常区别？
+  - 编译时异常一般发生的概率高，又叫受检异常，受控异常
+  - 运行时异常一般发生的概率低，又叫未受检异常，非受控异常
+
+##### try--catch
+
+```java
+// 捕获多个异常，小的写在前面 ； 可以捕获父异常
+try{
+    FileInputStream fis = new FileInputStream("D:\\a.txt");
+}catch(FileNotFoundException e){ // 小的Exception写在前面
+    System.out.println("文件不存在");
+}catch(IOException e){// 多态 IOException e = new FileNotFoundException();
+    System.out.println("读文件报错");
+}
+```
+
+#####  读取文件异常例子
+
+```java
+public static void main(String[] args){
+    FileInputStream fis = null; // 如果写在try下是局部变量，finally中用不了
+    try{
+		fis = new FileInputStream("D:\\a.txt");
+        String s = null;
+        s.toString(); // 这里一定出现空指针异常
+        System.out.println("hello");
+        
+    }catch(FileNotFoundException e){
+        e.printStackTrace();
+    }catch(IOException e){
+        e.printStackTrace();
+    }catch(NullPointException e){
+        e.printStackTrace();
+    }finally{
+        // 流的关闭这里比较保险
+        // finally中的代码一定会执行的，即使try出现了异常
+        if(fis != null){
+            try{
+               fis.close();
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+##### try-finally
+
+```java
+// 执行顺序： try - finally - return
+try{
+    System.out.println("try");
+    return;  // 只有 System.exit();  try - exit 不执行finally了
+}finally{
+    System.out.println("finally");
+}
+```
+
+- 面试题
+
+  ```java
+  int i = 100;
+  try{
+  // 这条代码出现在int i =100;的下面，所以最终结果必须是100，return语句还必须保证是最后执行的，一旦执行，则整个方法结束
+      return i; // 100
+  }finally{
+      i++;
+  }
+  
+  // 运行顺序：因为java中有两条规则，1. 方法体中的代码必须至上而下执行 2. return执行，则整个方法必须结束
+  int i = 100;
+  int j = i;
+  i++;
+  return j; 
+  ```
+
+  
+
+##### 自定义异常
+
+```java
+public class MyException extends Exception{
+	public MyException(){}
+	public MyException(String s){
+        super(s);
+	}
+}
+```
+
+##### 异常与方法覆盖
+
+- 重写之后的异常不能比重写之前的异常抛出更多（更宽泛）的异常，可以更少
+
+
+
+#### 集合
+
+##### collection结构图
+
+![1593943158939](png/集合结构图1)
+
+![1593943483028](png/集合结构图2)
+
+
+
+##### map结构图
+
+![1593943648386](png/map结构图)
+
+![1593943769083](png/集合总结)
+
+![1593943802449](png/集合总结2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
