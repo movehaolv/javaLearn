@@ -161,9 +161,45 @@ String y = new String("xyz");
 x == y; // false
 ```
 
-![
+![1593261568458](png/String_等于号比较内存图)
 
-1593261568458](png/String_等于号比较内存图)
+#### contains内存图
+
+```java
+Collection c = new ArrayList();
+String s1 = new String("abc");
+c.add(s1);
+String s2 = new String("def");
+c.add(s2);
+String x = new String("abc");
+c.contains(x); // true 因为底层调用了Object的equals方法，因为多态，从而调用了String的equal方法，而String的equals方法重写了，所以为true。
+// 所以如果放入的是不是字符串对象，需要重写equals方法(String, Integer不用重写，因为已经重写了)，否则比较的是内存地址，如下
+class User{
+    private String name;
+    public boolean equals(Object o){}
+    
+}
+```
+
+```java
+Collection c = new ArrayList();
+String s1 = new String("abc");
+c.add(s1);
+String s2 = new String("abc");
+c.add(s2);
+c.remove("abc");
+s.size; // 0 因为调用了equals方法，如果equals为ture则删除
+```
+
+
+
+
+
+'![1594123682204](png/contains内存图)
+
+
+
+
 
 ### 类
 
@@ -846,6 +882,8 @@ public class MyException extends Exception{
 
 ![1593943483028](png/集合结构图2)
 
+![1594449024998](png/List.png)
+
 
 
 ##### map结构图
@@ -856,31 +894,329 @@ public class MyException extends Exception{
 
 ![1593943802449](png/集合总结2)
 
+##### map常用方法
+
+```java
+void clear()
+boolean containKey(Object key)
+boolean containValue(Object value)
+V get(Object key)
+boolean isEmpty()
+Set<Key> keySet()
+V put(K key, V value)
+V remove(Object key)
+int size()
+Collection<V> values()
+Set<Map.Entry<K,V>> entrySet()
+    将Map集合转换为Set集合
+    示例：
+    key           value
+    1			zhangshan
+    2			lisi
+    3			wangwu
+    4			zhaoliu
+    
+    Set set = map1.entrySet();
+	set集合对象
+	1=zhangsan
+	2=lisi
+	3=wangwu
+	4=zhaoliu
+	注意：Map集合通过entrySet()方法转换为Set集合，Set集合中元素的类型是Map.Entry<K,V>
+	Map.Entry和String一样，是一种类型的名字，不过Map.Entry是Map静态内部类
+```
+
+##### 遍历集合的几种方式
+
+```java
+Map<Integer, String> map = new HashMap<Integer, String>();
+map.put(1, "zhangsan");
+map.put(2, "lisi");
+map.put(3, "wangwu");
+map.put(4, "zhaoliu");
+Set<Integer> keys = map.keySet();
+
+// 第一张方式
+Iterator<Integer> it = keys.iterator();
+while (it.hasNext()){
+Integer key = it.next();
+String value = map.get(key);
+System.out.println(key + "=" + map.get(key));
+}
+
+// 第二种方式
+for(Integer key:keys){
+System.out.println(key + "=" + map.get(key));
+}
+
+// 第三种方式 entrySet
+Set<Map.Entry<Integer,String>> set = map.entrySet();
+Iterator<Map.Entry<Integer,String>> it2 = set.iterator();
+while (it2.hasNext()){
+Map.Entry<Integer,String> node = it2.next();
+Integer key = node.getKey();
+String value = node.getValue();
+System.out.println(key + "=" + map.get(key));
+}
+
+// 第四种方式
+for(Map.Entry<Integer,String > node:set){
+System.out.println(node.getKey() + "----->" + node.getValue());
+}
+```
 
 
 
+##### 迭代器删除元素
+
+```java
+Collection c = new ArrayList();
+c.add("a");
+c.add("b");
+Iterator it = c.iterator();
+while(it.hasNext()){
+    Object o = it.next();
+    // c.remove(o); // 删除当前元素后，集合的结构发生了变化，应该重新获取迭代器，会出现异常
+    it.remove(); // 使用迭代器删除
+    System.out.println(o);
+}
+```
 
 
 
+##### ArrayList
+
+- 扩容
+  - 原容量的1.5倍
+  - 尽可能少的扩容，因为数组扩容效率比较低，建议使用ArrayList集合的时候预估元素的个数，给定一个初始化容量
+  - 数组优点：检索效率高
+  - 数组缺点：随机增删元素效率低
+  - ArrayList集合用的最多
+
+##### 链表
+
+- 单向链表
+
+  ![1594448817424](png/单向列表)
+
+![1594448910046](png/列表优缺点)
+
+- 双向链表
+  - 210 
+
+#### 泛型
+
+##### 定义
+
+```
+List<Animal> myList = new ArrayList<Animal>(); // 使用泛型，list中只允许存储Animal类型的数据
+myList.add("abc"); // 存储其他类型就编译报错
+Cat c = new Cat();
+Bird b = new Bird();
+myList.add(c);
+myList.add(b);
+Iterator<Animal> it = myList.iterator();
+while(it.hasNext()){
+    Animal a = it.next(); // 使用泛型，每一次迭代返回的数据都是Animal类型
+    a.move(); //  这里不需要使用强制类型转换，直接使用
+}
+```
+
+##### 自定义类型
+
+```java
+MyIterator<String> m1 = new MyIterator<String>();
+String s1 = m1.get();
+
+MyIterator<Integer> m2 = new MyIterator();
+Integer i1 = m2.get();
+class MyIterator<T>{
+    public T get(){
+        return null;
+    }
+}
+```
 
 
 
+#### 注解
+
+##### Override注解
+
+- 标识性注解，给编译器参考的，编译器会自动检查是否重写了父类的方法，没有则报错，只能注解方法
 
 
 
+##### 元注解
+
+![1594453860014](png/元注解)
+
+- 可以被反射机制所读取
+
+  ```java
+  // Retention的源代码
+  public @interface Retention{
+      RetentionPolicy value();
+  }
+  // RetentionPolicy的源代码
+  public enum RetentionPolicy{
+      SOURCE,
+      CLASS,
+      RUNTIME
+  }
+  @Retention(value=RetentionPolicy.SOURCE)
+  public @interface MyAnnotation{
+      
+  }
+  ```
+
+##### 自定义注解
+
+```java
+public @interface MyAnnotation{
+    String name(); // 属性，不是方法
+    String value();
+}
+
+public @interface MyAnnotation1{
+    String value(); // 属性只有一个value可以省略value
+}
+public class MyAnnotationTest{
+	@MyAnnotation(name="zhangsan",value="haha")
+    public void doSome(){};
+    
+    @MyAnnotation1("haha") // value可以省略
+    public void doOther(){};
+}
+```
+
+##### 属性是一个数组
+
+```java
+public @interface MyAnnotation{
+	// 注解的属性可以是byte short int long float double boolean char String Class 枚举类型及以上的每一种数组形式
+	int age();
+    String[] email();
+    Season[] seasonArray();
+}
+
+public class OtherAnnotation{
+    @MyAnnotation(age = 25, email = {"zhangsan@123.com", "lisi@456.com"})
+    public void doOther(){};
+    
+    @MyAnnotation(age = 25, email = "wangwu@789.com", seasonArray={Season.SPRING,Season.SUMMER})
+    public void doOthe1(){};
+}
+
+enum Season {
+    STRING,SUMMER,AUTUMN,WINTER
+}
+```
+
+##### 反射注解
+
+```java
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+
+public static void main(String[] args)throws Exception{
+	// 获取这个类
+    Class c = Class.forName("com.lh.MyAnnotationTest");
+    
+    // -------------------- 1. 通过类上的属性 ------------------------
+    // 判断类上面是否有@MyAnnnotation
+    if(c.isAnnotationPresent(MyAnnotation.class)){
+    // 获取该注解对象。返回的是Annotation，需要强制转型成MyAnnotation
+        MyAnnotation myAnnotation = (MyAnnotation)c.getAnnotation(MyAnnotation.class); 
+        System.out.println("类上面的注解对象" + myAnnnotation); // com.lh.MyAnnotation(value=SH)
+        // 获取注解的属性
+        String value = myAnnotation.value(); 
+        System.out.println(value); // SH
+    }
+    
+    // ----------------------- 2. 获取方法上的属性 ------------------------
+    // 获取doOther()方法
+    Method doSomeMethod = c.getDeclaredMethod("doSome");
+    if(doSomeMethod.isAnnotationPresent(MyAnnotation.class)){
+        MyAnnotation myAnnotation = doSomeMethod.getAnnotation(MyAnnotation.class);
+        System.out.println(myAnnotation.value()); // BJ
+    }
+}
+
+@MyAnnotation(value = "SH") 
+public class MyAnnotationTest{
+	@MyAnnotation(value = "BJ") 
+    public void doSome(){   
+    }
+}
+
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyAnnotation{
+    String value();
+}
+
+```
+
+##### 注解作用
+
+- 需求：类中必须要有一个int型的id
+
+```java
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import java.lang.annotation.Annotation;
 
 
+public class Test{
+	public static void main(String[] args) throws Exception{
 
 
+		Class c = Class.forName("Person");
+		if(c.isAnnotationPresent(Id.class)){
+			Field[] fields = c.getDeclaredFields();
+			boolean isOk = false;
+			for(Field field : fields){
+				if("id".equals(field.getName()) && "int".equals(field.getType().getSimpleName())){
+					isOk = true;
+					break;
+				}
+			}
+			if(!isOk){
+				throw new NotHasIntIdException("被@Id注解标注的类中必须要有一个int类型的id的属性！");
+			}
+		}	   		
+	}
+}
 
 
+@Id
+class Person{
+	int id; // 必须有这个才不会报错int型的id
+	String name;
+}
 
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Id{
+}
 
+class NotHasIntIdException extends RuntimeException{
+	public NotHasIntIdException(){}
+	
+	public NotHasIntIdException(String s){
+		super(s);
+	}
+}
 
-
-
-
-
+```
 
 
 
