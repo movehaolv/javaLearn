@@ -245,7 +245,7 @@ cat,bird extends animal, dog not extends animal
 
 * 有了封装这种整体概念之后，对象雨对象才生继承，有了继承之后，才有了方法覆盖，继而有多态。方法覆盖要和多态在一起才有意义。
 
-#### super
+#### super&this
 
 ##### super和this对比
 
@@ -936,7 +936,7 @@ map.put(3, "wangwu");
 map.put(4, "zhaoliu");
 Set<Integer> keys = map.keySet();
 
-// 第一张方式
+// 第一种方式
 Iterator<Integer> it = keys.iterator();
 while (it.hasNext()){
 Integer key = it.next();
@@ -1002,7 +1002,91 @@ while(it.hasNext()){
 ![1594448910046](png/列表优缺点)
 
 - 双向链表
-  - 210 
+  ```java
+  // LinkedList没有初始化容量，最初链表没有任何元素，first和last的引用都为null；不管是LinkedList还是ArrayList，写代码不需要关心哪个集合，因为我们要面向接口编程，调用的方法都是接口中的方法
+  List list = new LinkedList();
+  lst.add("a");
+  lst.add("b");
+  // 源码：
+  public boolean add(E e) {
+  linkLast(e);
+  return true;
+  }
+  void linkLast(E e) {
+      final Node<E> l = last;
+      final Node<E> newNode = new Node<>(l, e, null);
+      last = newNode;
+      if (l == null)
+          first = newNode;
+      else
+          l.next = newNode;
+      size++;
+      modCount++;
+  }
+  private static class Node<E> {
+      E item;
+      Node<E> next;
+      Node<E> prev;
+  
+      Node(Node<E> prev, E element, Node<E> next) {
+          this.item = element;
+          this.next = next;
+          this.prev = prev;
+      }
+  }
+  ```
+
+  ![1595073086133](png/双向链表1)
+
+
+
+   第一次add
+
+![1595073511411](C:/Users/ADMINI~1/AppData/Local/Temp/1595073511411.png)
+
+第二次add， new Node的时候l = 0x23
+
+![1595073713235](png/双向链表3)
+
+##### HashMap
+
+- HashMap集合底层是哈希表/散列表的数据结构
+
+  - 哈希表：数组和单向链表的结合体，充分发挥数组和链表的优势（一维数组，每一个元素是一个单向链表）
+
+  ![1594565787274](png/HashMap结构.png)
+
+
+
+- 源码
+
+  ```java
+  public class HashMap{
+      Node<k,v>[] table; // HashMap底层是一个一维数组
+      static class Node<K,V> implements Map.Entry<K,V>{
+          final int hash; // 哈希值（是key的hashCode()方法的执行结果。hash值通过哈希函数/算法，可以转换成数组的下标
+          final K key; // 存储到Map集合中的key
+          V value; // 存储到Map集合中的那个value
+          Node<K,V> next; // 下一个节点的内存地址
+      }
+  }
+  ```
+
+- 需掌握map.put(k, v)，map.get(k) 原理
+
+- key特点
+
+  - 无序不可重复
+  - 无序：不一定挂在哪个单向链表上
+  - 不可重复：equals方法保证不可重复，如果key相同，则value覆盖
+  - 放在HashMap中的key部分的元素其实放到HashSet集合中了，所以HashSet集合中的元素也需要同事重写hashCode()和equal()方法
+
+- HashMap使用不当无法发挥性能
+
+  - 假设将所有的hashCode()方法返回值固定为某个值，那么会导致底层哈希表变成了纯单向链表，这称为散列分布不均匀
+  - 散列分布均匀：100个元素，10个单向链表，每个单向链表上10个节点，这是最好的
+  - 假设所有的hashCode()方法返回值都设定为不一样，底层变成了一维数组了，也是散列分布不均匀
+  - 散列分布均匀需要你重写hashCode()方法的时候有一定的技巧
 
 #### 泛型
 
@@ -1036,6 +1120,496 @@ class MyIterator<T>{
     }
 }
 ```
+
+#### 线程
+
+##### 线程生命周期五大状态
+
+- 锁池不属于状态
+
+![1595128104243](png/线程生命周期)
+
+![1595141980539](png/线程生命周期2)
+
+##### sleep面试题
+
+```java
+public class Hello {
+    public static void main(String[] args) {
+
+        Thread t = new MyThread();
+        t.setName("t");
+        t.start();
+        try {
+            t.sleep(1000 * 5); // 执行的时候还是会转成Thread.sleep(1000*5)，这行代码的作用是让当前线程进入休眠，让main线程休眠，不是让线程t进入休眠，所以over是最后输出的。
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("over");
+    }
+}
+
+class MyThread extends Thread{
+    public void run(){
+        for(int i=0;i<100;i++){
+            System.out.println(i);
+        }
+    }
+}
+```
+
+##### interrupt终止睡眠
+
+```java
+public static void main(String[] args) throws InterruptedException {
+    Thread t = new Thread(new MyRunnable());
+    t.start();
+    t.sleep(1000); // 希望1s之后t线程醒来（主线程的活干完了）
+    t.interrupt(); // 终止t线程的睡眠，依靠java的异常处理机制，所以本次会输出异常信息，再打印“end”
+}
+class MyRunnable implements Runnable{
+
+    @Override
+    public void run() {
+        try {
+            Thread.sleep(1000 * 60 * 60);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("end");
+    }
+}
+```
+
+##### stop强行终止线程的执行
+
+```java
+public static void main(String[] args) throws InterruptedException {
+    Thread t = new Thread(new MyRunnable());
+    t.start();
+    t.sleep(1500);
+    // t.stop(); // 输出 0 1 2  // 已被弃用，数据不安全
+    t.interrupt(); // 输出 0 1 2 ... 9
+}
+class MyRunnable implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(i);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+##### 合理终止线程
+
+````java
+
+public class Hello {
+    public static void main(String[] args) throws InterruptedException {
+        MyRunnable r = new MyRunnable();
+        Thread t = new Thread(r);
+        t.start();
+        t.sleep(1500);
+        r.run = false;
+    }
+}
+
+class MyRunnable implements Runnable{
+    boolean run = true;
+    @Override
+    public void run() {
+        for (int i = 0; i < 10; i++) {
+            if(run){
+                System.out.println(i);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                return;
+            }
+
+        }
+    }
+}
+````
+
+##### 线程调度方法
+
+![1595128365737](png/线程调度方法)
+
+##### 线程让位
+
+```java
+public class Hello {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(new MyRunnable());
+        t.start();
+
+        for (int i = 0; i < 10000; i++) {
+            System.out.println("main " + i);
+        }
+    }
+}
+
+class MyRunnable implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 10000; i++) {
+            if(i % 100 == 0){
+                Thread.yield(); // 执行100次就让给其余线程执行
+            }
+            System.out.println("分支 " + i);
+        }
+    }
+}
+```
+
+
+
+##### 线程合并
+
+```java
+public class Hello {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(new MyRunnable());
+        t.start();
+        t.join(); // t合并到当前线程中，当前线程阻塞，t线程执行直到结束
+        System.out.println("over"); // over最后输出
+    }
+}
+
+class MyRunnable implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 10000; i++) {
+            System.out.println(i);
+        }
+    }
+}
+```
+
+ ##### 线程安全
+
+- 什么时候数据在多线程并发的环境下存在安全问题？
+  - 多线程并发
+  - 有共享数据
+  - 共享数据有修改的行为（只是查询都不涉及线程安全）
+- 如何解决？
+  - 使用“线程同步机制”， 即不能并发
+- 线程同步涉及两个专业术语
+  - 异步编程模型：并发
+  - 同步编程模型：排队
+- 变量的线程安全
+  - 局部变量永远不会存在线程安全问题，因为不是共享数据；
+  - 常量也没有线程安全问题，因为不可修改；
+  - 堆和方法区都是多线程共享的，所以静态变量和实例变量存在线程安全；
+
+##### synchronized
+
+![1595142292764](png/synchronized0)
+
+![1595142213221](png/synchronized)
+
+ 
+
+```java
+class Account {
+
+    private String account;
+    private int balance;
+
+    Object obj = new Object(); 
+
+    public Account(){}
+
+    public Account(String account, int balance) {
+        this.account = account;
+        this.balance = balance;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+	
+//    public synchronized void withDraw(int money)  { // 出现在实例方法上，表示整个方法都需要同步，可能会扩大同步范围，效率较低；共享的对象只能是this，不灵活；好处是：代码写少了
+    public void withDraw(int money)  {
+//        synchronized (this){ // 效果与obj一样，括号里只要共享对象就行
+        
+       // synchronized ("abc"){ // 所有线程都会同步
+//        Object obj2 = new Object(); // 这个不行，因为不是共享对象
+        synchronized (obj){
+            int before = this.getBalance();
+            int after = before - money;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            this.setBalance(after);
+        }
+    }
+}
+
+class AccountThread implements Runnable{
+
+    private Account account;
+
+    public AccountThread(Account account){
+        this.account = account;
+    }
+
+    @Override
+    public void run() {
+        account.withDraw(5000);
+        System.out.println("账户：" + account.getAccount() + " 余额 " + account.getBalance());
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Account account = new Account("ac1", 10000);
+        Thread t1 = new Thread(new AccountThread(account));
+        Thread t2 = new Thread(new AccountThread(account));
+        t1.start();
+        t2.start();
+    }
+}
+```
+
+
+
+![1595143132398](png/synchronized1)
+
+
+
+###### 面试题
+
+- 静态方法是类锁，不管创建几个对象，类锁都只有一个，所以结果是t2需要等待t1执行完成
+
+```java
+public class Test {
+    public static void main(String[] args) throws InterruptedException {
+        MyClass m1 = new MyClass();
+        MyClass m2 = new MyClass();
+
+        Thread t1 = new MyThread(m1);
+        Thread t2 = new MyThread(m2);
+        t1.setName("t1");
+        t2.setName("t2");
+
+        t1.start();
+        Thread.sleep(1000); // 作用是保证t1先执行
+        t2.start();
+    }
+
+}
+
+class MyThread extends Thread{
+    MyClass m;
+    public MyThread(MyClass m){
+        this.m = m;
+    }
+
+    public void run(){
+        if(Thread.currentThread().getName().equals("t1")){
+            m.doSome();
+        }else if(Thread.currentThread().getName().equals("t2")){
+            m.doOther();
+        }
+    }
+}
+
+class MyClass{
+    public synchronized static void doSome(){
+        try {
+            Thread.sleep(1000 * 5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("doSome");
+    }
+
+    public synchronized static void doOther(){ 
+        System.out.println("doOver");
+    }
+
+}
+```
+
+
+
+##### 死锁
+
+- 不出现异常也不出现错误，很难调试，死锁要学会写
+
+  ![1595170151714](png/死锁.png)
+
+```java
+// 添加了sleep，代码一定会形成死锁，一直会卡住，因为两个线程需要拿各自的o1或o2，所以最好不要synchronized嵌套
+
+public class Test {
+    public static void main(String[] args) throws InterruptedException {
+        Object o1 = new Object();
+        Object o2 = new Object();
+        Thread t1 = new MyThread1(o1, o2);
+        Thread t2 = new MyThread2(o1, o2);
+        t1.start();
+        t2.start();
+    }
+}
+
+class MyThread1 extends Thread{
+    private Object o1;
+    private Object o2;
+    public MyThread1(Object o1, Object o2){
+        this.o1 = o1;
+        this.o2 = o2;
+    }
+
+    @Override
+    public void run() {
+        synchronized (o1){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            synchronized (o2){
+            }
+        }
+    }
+}
+
+class MyThread2 extends Thread{
+    private Object o1;
+    private Object o2;
+    public MyThread2(Object o1, Object o2){
+        this.o1 = o1;
+        this.o2 = o2;
+    }
+
+    @Override
+    public void run() {
+        synchronized (o2){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            synchronized (o1){
+            }
+        }
+    }
+}
+
+```
+
+##### 开发中解决线程安全问题
+
+![1595159965838](png/线程安全问题处理)
+
+##### 守护线程&定时器
+
+![1595161473433](png/守护线程)
+
+```java
+public static void main(String[] args) throws InterruptedException {
+    Thread t = new MyThread();
+    t.setDaemon(true); / 启动线程前，将t设置为守护线程。所以当main方法结束，守护线程也就结束，即使t线程是死循环
+    t.start();
+    ... 
+}
+```
+
+
+
+![1595161407266](png/定时器)
+
+![1595162076842](png/定时器代码)
+
+##### 创建线程的第三种方式
+
+  
+
+```java
+public class Test {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        FutureTask task = new FutureTask(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                Thread.sleep(1000 * 5);
+                return 1 + 2;
+            }
+        });
+
+        Thread t = new Thread(task);
+        t.start();
+        Object obj = task.get(); // 缺点：使得当前线程阻塞，优点：获取t线程的结果
+        System.out.println("线程执行最终结果 " + obj);
+
+    }
+}
+```
+
+##### wait和notify
+
+![1595168145993](png/生产者消费者)
+
+需求
+
+![1595168393175](png/多线程需求)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
