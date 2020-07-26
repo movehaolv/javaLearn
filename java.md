@@ -880,7 +880,11 @@ public class MyException extends Exception{
 
 ![1593943158939](png/集合结构图1)
 
+- SortedSet：无序不可重复，但是可以按照大小排序的，称为可排序集合
+
 ![1593943483028](png/集合结构图2)
+
+- 无序不可重复，但是可以按照元素的大小自动排序。放到TreeSet集合中的元素，等同于放到TreeMap集合的Key部分了。
 
 ![1594449024998](png/List.png)
 
@@ -890,7 +894,8 @@ public class MyException extends Exception{
 
 ![1593943648386](png/map结构图)
 
-- 补充HashMap：在JDK8之后，如果哈希表单向链表中元素超过8个，单向链表这种数据结构会变成红黑树数据结构。当红黑树上的节点数量小于6时，会重新把红黑树编程单向链表数据结构，这种方式也是为了提高检索效率，二叉树的检索会再次缩小扫描范围，提高效率。初始化容量16，默认加载因子为0.75
+- 补充HashMap：在JDK8之后，如果哈希表单向链表中元素超过8个，单向链表这种数据结构会变成红黑树数据结构。当红黑树上的节点数量小于6时，会重新把红黑树编程单向链表数据结构，这种方式也是为了提高检索效率，二叉树的检索会再次缩小扫描范围，提高效率。初始化容量16，默认加载因子为0.75。扩容之后的容量是原来的2倍
+- 补充：Hashtable的初始化容量为11，默认加载银子0.75f，扩容后：原容量*2+1
 
 ![1593943769083](png/集合总结)
 
@@ -995,6 +1000,48 @@ while(it.hasNext()){
   - 数组缺点：随机增删元素效率低
   - ArrayList集合用的最多
 
+```java
+List<WuGui2> list = new ArrayList<>();
+// Collections.synchronizedList(list); // 变成线程安全
+
+// 对list排序  // 对List集合中的元素排序，需要实现Comparable接口
+list.add(new WuGui2（1000));
+list.add(new WuGui2（800));
+Collections.sort(list); 
+
+// 对set集合排序
+Set<String> set = new HashSet<>();
+set.add("king3");
+set.add("king2");
+List<String> myList = new ArrayList<>(set);
+Collections.sort(myList);
+
+// 使用构造器比较，按字符串从小到大排列
+Collections.sort(myList, new Comparator<String>() {
+    @Override
+    public int compare(String o1, String o2) {
+        return o1.length() - o2.length();
+    }
+});
+
+class WuGui2 implements Comparable<WuGui2>{
+    int age;
+    public WuGui2(int age){
+        this.age = age;
+    }
+    @Override
+    public String toString() {
+        return "WuGui2{" + "age=" + age + '}';
+    }
+    @Override
+    public int compareTo(WuGui2 o) {
+        return this.age - o.age;
+    }
+}
+```
+
+
+
 ##### 链表
 
 - 单向链表
@@ -1052,8 +1099,6 @@ while(it.hasNext()){
 
 ##### HashMap
 
-
-
 - HashMap集合底层是哈希表/散列表的数据结构
 
   - 哈希表：数组和单向链表的结合体，充分发挥数组和链表的优势（一维数组，每一个元素是一个单向链表）
@@ -1097,7 +1142,7 @@ while(it.hasNext()){
 
 - 注意：**equals方法和hashCode方法必须同时重写**。如果equals方法返回true，那么hashcode方法必须返回true，而如果hashcode()方法不重写，调用Object的hashCode方法，可能返回的是哈希值就不一样（如下代码）。equals方法返回true，表示两个对象相同，在同一个单向链表上比较。那么对于同一个单向链表上的节点来说，他们的哈希值都是相同的，所以hashCode()方法的返回值也应该相同
 
-```
+```java
 // 只重写euqals方法
 Student s1 = new Student("zhangsan");
 Student s2 = new Student("zhangsan");
@@ -1107,7 +1152,129 @@ s2.hashCode();// Student的内存地址 2010101
 
 ```
 
+- 哈希碰撞：o1和o2的值不同，但是经过哈希算法执行结束之后转换的数组下标可能相同，此时会发生“哈希碰撞”
+- HashMapkey部分允许为null，null值只能有一个，value也可以为null。
+  - Hashtable的key和value都不能为null（因为源代码有key.hashCode()，如果为null，出现空指针异常）
 
+##### properties
+
+```java
+Properties pro = new Properties();
+pro.setProperty("url", "www.baidu.com");
+pro.getProperty("url");
+
+```
+
+##### TreeSet
+
+放到TreeSet或TreeMap集合key部分的元素想要排序通过以下两种方式
+
+###### Comparable接口
+
+放到集合中的元素实现java.lang.Comparable接口
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        TreeSet<Vip> vips = new TreeSet<>();
+        vips.add(new Vip("zhangsi",20));
+        vips.add(new Vip("zhangsan",20));
+        vips.add(new Vip("king",18));
+        vips.add(new Vip("soft",17));
+        for(Vip vip:vips){
+            System.out.println(vip);
+        }
+    }
+}
+
+class Vip implements Comparable<Vip>{
+    String name;
+    int age;
+    public Vip(String name, int age){
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString(){
+        return "Vip{" + "name =" + name + ",age =" + age + "}";
+    }
+    /*
+    compareTo返回值：
+    >0 会继续在右子树上找
+    <0 会继续在左子树上找
+    = 0 表示相同，value会覆盖
+     */
+
+    @Override
+    public int compareTo(Vip v){
+        if(this.age == v.age){
+            return this.name.compareTo(v.name); // 按照字母一个一个比较，'a'<'b'
+        }else{
+            return this.age - v.age;
+        }
+    }
+```
+
+
+
+![1595734625124](png/自平衡二叉树.png)
+
+###### 比较器对象
+
+使用TreeSet或treeMap集合的时候传一个比较器对象
+
+- 使用比较器的方式，那么cpr就不是null，走以下的逻辑进行put元素到树中。
+
+![1595737259973](png/map的put方法.png)
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        // TreeSet<WuGui> wuGuis= new TreeSet<>(new WuGuiComparator());
+        // 使用匿名内部类的方式
+        TreeSet<WuGui> wuGuis= new TreeSet<>(new Comparator<WuGui>(){
+            @Override
+            public int compare(WuGui o1, WuGui o2) {
+                return o1.age - o2.age;
+            }
+        });
+        
+        wuGuis.add(new WuGui(1000)); // add方法会调用TreeMap的put方法
+        wuGuis.add(new WuGui(800));
+        wuGuis.add(new WuGui(810));
+        for(WuGui wuGui:wuGuis){
+            System.out.println(wuGui);
+        }
+    }
+}
+
+class WuGui{
+    int age;
+    public WuGui(int age){
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "WuGui{" +
+                "age=" + age +
+                '}';
+    }
+}
+
+// 编写一个比较器
+class WuGuiComparator implements Comparator<WuGui>{
+    @Override
+    public int compare(WuGui o1, WuGui o2) {
+        return o1.age - o2.age;
+    }
+}
+```
+
+##### Comparable和Comparator选择
+
+比较规则只有一个的时候建议实现Comparalbe接口；比较规则有多个，并且多个规则频繁切换，建议使用Comparator接口，符合OCP原则。
 
 
 
