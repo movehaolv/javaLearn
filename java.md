@@ -16,27 +16,27 @@
 
 #### 递归内存图
 
-![](D:\java\typora\png\image002.png)
+![](png\image002.png)
 
 #### 对象内存图
 
-![](D:\java\typora\png\image003.png)
+![](png\image003.png)
 
-![](D:\java\typora\png\image004.png)
+![](png\image004.png)
 
 #### 对象作为实例变量的内存图
 
-![](D:\java\typora\png\image007.png)
+![](png\image007.png)
 
 **执行javac Test.java生成Test.class，User.class和Address.class，在运行 java Test的时候jvm就有如下内存图**   
 
-![](D:\java\typora\png\image008.png)
+![](png\image008.png)
 
 #### 值拷贝
 
 **Java中都是值拷贝，不是引用，基本类型是把保存在内存中的值拷贝，引用类型也是把保存在内存中的地址值拷贝**
 
-![](D:\java\typora\png\image009.png)
+![](png\image009.png)
 
 #### 253静态变量jvm
 
@@ -57,8 +57,8 @@ p1.country 访问静态变量也行，其实将p1变成Person.country进行访�
 #### 311 super内存结构
 
 ```java
-Public Class SuperTest{
-    public static void mian(String[] args){
+public class SuperTest{
+    public static void main(String[] args){
         CreditAccount ca1 = new CreditAccount();
         CreditAccount ca2 = new CreditAccount("11111", 10000, 0.999);
     }
@@ -215,7 +215,7 @@ s.size; // 0 因为调用了equals方法，如果equals为ture则删除
 下图的a.doSome() 还是输出的Animal的doSome()；当然Animal.doSome输出Animal的，Cat的doSome输出Cat的
 ```
 
-![](/静态方法不存在覆盖.png)
+![](png/静态方法不存在覆盖.png)
 
 ##### 覆盖的返回值类型可不同？
 
